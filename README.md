@@ -110,6 +110,30 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 - Backbone & Classifier：联合训练模型骨干网络和分类器。
 - Only Classifier：只训练分类器。
 
+### 模型名称映射表（Model Name Mapping）
+
+| 论文模型名称 | 代码实际名称 | Attention | Positional Encoding | Patch Size |
+|---|---|---|---|---|
+| SimpleDyG | DyGFormer | MHSA | None | 4 |
+| SimpleDyG (w/o Patch) | DyGFormerC | MHSA | None | 1 |
+| DADyG | DyGFormerF | Differential Attention | None | 4 |
+| NPADyG | NPTDyG | Non-Parametric Attention | None | 4 |
+| CARDyG | 待填写 | CARD-inspired Attention | None | 4 |
+| SPSEDyG | DyGFormerSPSE | SPSE Attention Bias | None | 4 |
+| SPEDyG | DyGFormerP | MHSA | Sinusoidal PE | 4 |
+| RoPEDyG | DyGFormerR | MHSA | Rotary PE | 4 |
+| SDPEDyG | DyGFormerST | MHSA | Shortest Distance PE | 4 |
+| RWPEDyG | DyGFormerD | MHSA | Random Walk PE | 4 |
+| STPEDyG | DyGFormerWSDMP | MHSA | Spatial-Temporal PE | 4 |
+| DASTDyG | DyGFormerWSDMPF | Differential Attention | Spatial-Temporal PE | 4 |
+| DARoDyG | DyGFormerFF | Differential Attention | Rotary PE | 4 |
+| CASTDyG | 待填写 | CARD-inspired Attention | Spatial-Temporal PE | 4 |
+| CARoDyG | 待填写 | CARD-inspired Attention | Rotary PE | 4 |
+| NPASDDyG | 待填写 | Non-Parametric Attention | Shortest Distance PE | 4 |
+| NPASTDyG | 待填写 | Non-Parametric Attention | Spatial-Temporal PE | 4 |
+
+
+
 ### 3. 默认超参数
 
 实验设置如下：
