@@ -1,5 +1,4 @@
 # DyGForge_
-# DyGForge 科研项目交接说明
 
 ## 一、项目背景与研究目标
 
@@ -13,7 +12,7 @@
 
 1. **Attention Mechanism**：比较不同注意力机制对动态图历史交互信息建模能力的影响。
 2. **Positional Encoding**：分析时间位置编码、图结构位置编码以及时空联合位置编码的效果。
-3. **Patching**：研究历史交互序列分块对预测精度、显存消耗和计算效率的影响。
+3. **Patching**：研究历史交互序列patch对预测精度、显存消耗和计算效率的影响。
 
 ### 主要研究问题
 
@@ -41,7 +40,7 @@
 - Time Interval Encoding
 - Neighbor Co-occurrence Encoding
 
-输入编码器原则上保持统一，避免不同实验同时改变多项设计。
+输入编码器原则上保持统一。
 
 ### 2. Attention Modules
 
@@ -52,12 +51,12 @@
 | SimpleDyG | Multi-Head Self-Attention |
 | DADyG | Differential Attention |
 | NPADyG | Non-Parametric Attention |
-| CARDyG | CARD-inspired Attention |
+| CARDyG | CARD Attention |
 | SPSEDyG | Simple Path Structure Biased Attention |
 
 ### 3. Positional Encoding Modules
 
-在 MHSA 基础上比较以下五种位置编码方法：
+在 MHSA （Multi-Head Self-Attention）基础上比较以下五种位置编码方法：
 
 | 模型 | Positional Encoding |
 |---|---|
@@ -75,8 +74,8 @@
 |---|---|---|
 | DASTDyG | Differential | Spatial-Temporal |
 | DARoDyG | Differential | RoPE |
-| CASTDyG | CARD-inspired | Spatial-Temporal |
-| CARoDyG | CARD-inspired | RoPE |
+| CASTDyG | CARD | Spatial-Temporal |
+| CARoDyG | CARD | RoPE |
 
 动态节点分类重点比较：
 
@@ -113,7 +112,7 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 ### 3. 默认超参数
 
-论文 §6.1.4 给出的实验设置如下：
+实验设置如下：
 
 | 参数 | 配置 |
 |---|---|
@@ -130,11 +129,10 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | Early Stopping Patience | 20 |
 | 数据划分 | 时间顺序 70% / 15% / 15% |
 
-实际实验前，需要将以上设置与当前代码、配置文件核对，不能只依据论文文字确认运行设置。
 
-## 四、需要完成或核验的实验清单
 
-以下按照论文实验章节整理。各项目前尚未标记实际完成状态，需要结合现有结果文件逐项确认。
+## 四、需要完成或核验的实验
+
 
 ### E1. Attention 模块对比实验
 
@@ -154,7 +152,7 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 实验范围：九个链路预测数据集，包含 Transductive / Inductive AP 和 AUC-ROC。
 
-目的：研究顺序位置编码、图结构编码和时空联合编码的性能差异。
+目的：研究序列位置编码、图结构编码和时空联合编码的性能差异。
 
 ### E3. Patching 消融实验
 
@@ -235,7 +233,7 @@ Wikipedia、Reddit。
 
 需要区分模块级模型和组合模型、Baseline 的效率对比。
 
-注意计算时间应采用统一测量口径及可比较的硬件环境。
+
 
 ### E8. Patching 与二阶邻居数量实验
 
@@ -295,17 +293,9 @@ Patch Size：
 
 历史统计结果如果缺少原始文件支持，暂时只作为参考，不直接视为最终论文结果。
 
-## 六、论文草稿中需要注意的核查事项
 
-1. 论文 §5 写有 15 个模型，但 Table 2 实际包含 17 个模型条目，需要统一模型数量和命名。
-2. 节点分类的部分模型在正文、图表中存在命名差异，需要和实际代码确认。
-3. Patching 实验的文字结论与 Table 8 的部分结果不完全一致，需要重新核对。
-4. 论文中多处使用 Mean ± Std，但还需要从原始实验记录中明确 Seed 数量和统计口径。
-5. 实验结果应当与最终采用的模型实现、配置及评估协议保持一致。
 
-上述事项属于论文与现有实验记录的待核查问题，不代表已经确认全部实验存在错误。
-
-## 七、建议的后续工作顺序
+## 六、建议的后续工作顺序
 
 **第一阶段：熟悉代码与现有实验**
 
