@@ -118,7 +118,7 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | SimpleDyG (w/o Patch) | DyGFormerC | MHSA | None | 1 |
 | DADyG | DyGFormerF | Differential Attention | None | 4 |
 | NPADyG | NPTDyG | Non-Parametric Attention | None | 4 |
-| CARDyG | 待填写 | CARD-inspired Attention | None | 4 |
+| CARDyG | 待填写 | CARD Attention | None | 4 |
 | SPSEDyG | DyGFormerSPSE | SPSE Attention Bias | None | 4 |
 | SPEDyG | DyGFormerP | MHSA | Sinusoidal PE | 4 |
 | RoPEDyG | DyGFormerR | MHSA | Rotary PE | 4 |
@@ -127,8 +127,8 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | STPEDyG | DyGFormerWSDMP | MHSA | Spatial-Temporal PE | 4 |
 | DASTDyG | DyGFormerWSDMPF | Differential Attention | Spatial-Temporal PE | 4 |
 | DARoDyG | DyGFormerFF | Differential Attention | Rotary PE | 4 |
-| CASTDyG | 待填写 | CARD-inspired Attention | Spatial-Temporal PE | 4 |
-| CARoDyG | 待填写 | CARD-inspired Attention | Rotary PE | 4 |
+| CASTDyG | 待填写 | CARD Attention | Spatial-Temporal PE | 4 |
+| CARoDyG | 待填写 | CARD Attention | Rotary PE | 4 |
 | NPASDDyG | 待填写 | Non-Parametric Attention | Shortest Distance PE | 4 |
 | NPASTDyG | 待填写 | Non-Parametric Attention | Spatial-Temporal PE | 4 |
 
@@ -369,6 +369,4 @@ python train_node_classification.py --dataset_name wikipedia --model_name DyGFor
 ```
 ---
 
-**交接说明：**
 
-本次交接主要提供项目已有的模型代码、实验脚本、现存结果文件及已知问题说明。具体实验完成状态仍需根据代码和原始文件确认。后续实验安排、模型优化及论文修改可在此基础上继续开展。
