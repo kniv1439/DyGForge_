@@ -108,7 +108,7 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 评价指标为 AUC-ROC，包含两种训练设置：
 
 - Backbone & Classifier：联合训练模型骨干网络和分类器。
-- Only Classifier：只训练分类器。
+- Only Classifier：加载模型在链路预测任务上训练好的backbone，只训练分类器。
 
 ### 模型名称映射表（Model Name Mapping）
 
@@ -118,20 +118,21 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | SimpleDyG (w/o Patch) | DyGFormerC | MHSA | None | 1 |
 | DADyG | DyGFormerF | Differential Attention | None | 4 |
 | NPADyG | NPTDyG | Non-Parametric Attention | None | 4 |
-| CARDyG | 待填写 | CARD-inspired Attention | None | 4 |
+| CARDyG | 待搭建 | CARD Attention | None | 4 |
 | SPSEDyG | DyGFormerSPSE | SPSE Attention Bias | None | 4 |
 | SPEDyG | DyGFormerP | MHSA | Sinusoidal PE | 4 |
 | RoPEDyG | DyGFormerR | MHSA | Rotary PE | 4 |
 | SDPEDyG | DyGFormerST | MHSA | Shortest Distance PE | 4 |
 | RWPEDyG | DyGFormerD | MHSA | Random Walk PE | 4 |
 | STPEDyG | DyGFormerWSDMP | MHSA | Spatial-Temporal PE | 4 |
+
 | DASTDyG | DyGFormerWSDMPF | Differential Attention | Spatial-Temporal PE | 4 |
 | DARoDyG | DyGFormerFF | Differential Attention | Rotary PE | 4 |
-| CASTDyG | 待填写 | CARD-inspired Attention | Spatial-Temporal PE | 4 |
-| CARoDyG | 待填写 | CARD-inspired Attention | Rotary PE | 4 |
-| NPASDDyG | 待填写 | Non-Parametric Attention | Shortest Distance PE | 4 |
-| NPASTDyG | 待填写 | Non-Parametric Attention | Spatial-Temporal PE | 4 |
-
+| CASTDyG | 待搭建 | CARD Attention | Spatial-Temporal PE | 4 |
+| CARoDyG | 待搭建 | CARD Attention | Rotary PE | 4 |
+| NPASDDyG | NPTSTDyG | Non-Parametric Attention | Shortest Distance PE | 4 |
+| NPASTDyG | NPTWSDMP | Non-Parametric Attention | Spatial-Temporal PE | 4 |
+（注：组合模型均需重新跑完全部模块级实验之后对比选出Top-2的优势模块进行组合，注意力2*位置编码2，四个组合模型，各自分别在链路预测和节点分类上与十个baseline进行对比）
 
 
 ### 3. 默认超参数
@@ -157,6 +158,27 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 ## 四、需要完成或核验的实验
 
+## 数据集下载及预处理
+Nine datasets are used in DyGForge, including Wikipedia, Reddit, MOOC, Enron, UCI, Can. Parl., US Legis., UN Trade, UN Vote.
+
+All of the used original dynamic graph datasets come from Towards Better Evaluation for Dynamic Link Prediction, which can be downloaded [here [https://github.com/erfanloghmani/myket-android-application-market-dataset](https://zenodo.org/records/7213796#.Y1cO6y8r30o). Please download them and put them in DG_data folder. 
+
+
+We can run `preprocess_data/preprocess_data.py` for pre-processing the datasets. For example, to preprocess the *Wikipedia* dataset, we can run the following commands:
+
+```bash
+cd preprocess_data/
+python preprocess_data.py --dataset_name wikipedia
+```
+
+We can also run the following commands to preprocess all the original datasets at once:
+
+```bash
+cd preprocess_data/
+python preprocess_all_data.py
+```
+
+
 
 ### E1. Attention 模块对比实验
 
@@ -168,6 +190,11 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 目的：分析不同 Attention 机制对于历史交互信息建模的影响，以及在不同数据集上的表现差异。
 
+实验进展：目前已跑完SimpleDyG（DyGFormer）在enron，uci，mooc的链路预测三个runs的实验、DADyG（DyGFormerF）在除了USLegis以外的八个数据集上的三个runs的实验；
+
+需要补充的实验：SimpleDyG、DADyG在各自剩余数据集上的链路预测的三个runs的实验、NPADyG在九个数据集上的链路预测的三个runs的实验、CARDyG需要结合CARD: Channel Aligned Robust Blend Transformer for Time Series
+Forecasting.原始论文，将SimpleDyG里的标准多头注意力替换成原始论文里的CARD注意力作为CARDDyG，搭建好模型后跑完九个数据集上的链路预测的三个runs的实验、 SPSEDyG因为采取了SPSE基于图拓扑结构信息作为注意力分数的偏置，为了提高效率，需要对所有数据集的SPSE特征进行预计算并存储到磁盘里，需要同时考虑正负样本在计算SPSE时计算口径和方式一致，避免训练时出现正负样本SPSE不对称，导致模型分数更容易区分正负样本而拉高指标，再跑完九个数据集上的链路预测的三个runs的实验。目前SimpleDyG、DADyG、NPADyG 和 SPSEDyG模型代码都已搭建好，可直接训练；SPSEDyG需要再完善修改下正负样本的SPSE的预计算、存储方式再进行训练，CARDyG需要在SimpleDyG代码基础上替换成和原始论文一致的CARD注意力，再进行训练。
+
 ### E2. Positional Encoding 模块对比实验
 
 **对应：§6.2.1、Table 4**
@@ -177,6 +204,11 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 实验范围：九个链路预测数据集，包含 Transductive / Inductive AP 和 AUC-ROC。
 
 目的：研究序列位置编码、图结构编码和时空联合编码的性能差异。
+
+实验进展：目前已跑完RoPEDyG（DyGFormerR）在uci上的一个runs的实验、SDPEDyG（DyGFormerST）在UNvote上的一个runs的实验、RWPEDyG（DyGFormerD）在wikipedia上预计算rwpe dim=8的三个runs的实验，在mooc上的预计算rwpe dim=24的三个runs的实验。
+
+需要补充的实验：SPEDyG（DyGFormerP）、RoPEDyG（DyGFormerR）、SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD） 和 STPEDyG（DyGFormerWSDMP）在九个数据集上的链路预测的三个runs的实验。SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD）同样因为是基于图拓扑结构的位置编码，可以预先提前对数据集进行预计算，存储来提高训练效率，也需要注意正负样本在计算特征时计算口径和方式一致。五个模型代码都已搭建完成，SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD）的预计算代码我已完成好，分别名为precompute_spd_modelfn.py；precompute_rwpe_modelfn.py；因为RWPE里的random walk位置编码的特征维度K，代表它是一个K维的向量，最多包含经过K步游走回到它自身的概率，原始论文里在不同的数据集用了不同的K值，原始论文里是在2,4,8,12,16,20,24,28,32这些2的倍数里选择，我们也需要在这个范围里调一下K值，如果k的选择影响不大，可以不必花费太多时间在挑这个上面，并且运行RWPEDyG（DyGFormerD）的预计算代码时，可以通过更改文件里面预计算时的特征维度值（k）来改变这个预计算和存储的特征维度。
+
 
 ### E3. Patching 消融实验
 
@@ -190,6 +222,11 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 实验范围：九个链路预测数据集。
 
 目的：分析 Patching 对细粒度时序信息与预测性能的影响，并核对不同指标上的实际变化。
+
+实验进展：目前已跑完 SimpleDyG（Without Patching）（DyGFormerC）在mooc上的一个runs的实验；
+
+需要补充的实验：SimpleDyG（Without Patching）（DyGFormerC）在剩余八个数据集上的链路预测的三个runs的实验。
+
 
 ### E4. 动态节点分类模块对比
 
@@ -205,13 +242,13 @@ SimpleDyG、DADyG、CARDyG、NPADyG、SPSEDyG、SPEDyG、SDPEDyG、RWPEDyG、RoP
 
 目的：研究动态节点分类与动态链路预测是否具有不同的模块偏好。
 
+需要补充的实验：需要重新对SimpleDyG、DADyG、CARDyG、NPADyG、SPSEDyG、SPEDyG、SDPEDyG、RWPEDyG、RoPEDyG、STPEDyG、SimpleDyG (w/o Patch) 以上所有模型跑完在wikipedia和reddit数据集上的Backbone & Classifier 和 Only Classifier 两种训练设置跑完3个runs，并针对注意力、位置编码挑选不同的Top-2优势模块进行组合，专门在E6. 节点分类组合模型与 Baseline 对比。
+
 ### E5. 链路预测组合模型与 SOTA 对比
 
 **对应：§6.3.1、Figure 5、Table 6–7**
 
 比较四种组合模型：
-
-DASTDyG、DARoDyG、CASTDyG、CARoDyG。
 
 论文中的对照模型包括：
 
@@ -223,19 +260,25 @@ RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、EdgeBank、Grap
 
 目的：验证表现较好的模块组合能否取得有竞争力的结果。
 
+需要补充的实验：需要根据跑完的所有Attention 模块对比实验和Positional Encoding 模块对比实验来挑选各自的Top-2优势模块分别进行组合，得到四个模型与十个baseline在链路预测的九个数据集上进行比较。
+
+已跑完的实验：DASTDyG（DyGFormerWSDMPF）在CanParl, UNtrade, UNvote, USLegis,  uci, wikipedia上的三个runs的实验、在mooc，enron上的两个runs的实验，在reddit上的一个run的实验。
+
 ### E6. 节点分类组合模型与 Baseline 对比
 
 **对应：§6.3.2、Figure 6**
 
 主要比较：
 
-SDPEDyG、STPEDyG、NPASDDyG、NPASTDyG。
+待定
 
 实验范围：Wikipedia、Reddit。
 
 需要在 Backbone & Classifier、Only Classifier 两种训练设置下比较 AUC-ROC，并与 Figure 6 中的 Baseline 对应。
 
 目的：检验不同 Attention 与 PE 的组合是否能够进一步提高节点分类性能。
+
+需要补充的实验：需要重新在E4. 动态节点分类模块挑选出Top-2的优势模块进行组合，与RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、EdgeBank、GraphMixer、TCL十个baseline模型均重新对比跑完在wikipedia和reddit数据集上的Backbone & Classifier 和 Only Classifier 两种训练设置的3个runs的综合结果，均值±标准差。
 
 ### E7. 计算效率实验
 
@@ -257,7 +300,7 @@ Wikipedia、Reddit。
 
 需要区分模块级模型和组合模型、Baseline 的效率对比。
 
-
+需要补充的实验：需要重新对工作中所有模块级与组合模型级的实验以及十个baseline在链路预测Wikipedia、Reddit、MOOC、Can. Parl.、节点分类Wikipedia、Reddit上的GPU Memory Usage（MB）、Trainable Parameter Size（MB）、Training Time of the First Step（s）三种指标的统计。
 
 ### E8. Patching 与二阶邻居数量实验
 
@@ -287,62 +330,38 @@ Patch Size：
 
 目的：研究二阶邻居数量与 Patch Size 对模型预测效果和效率的共同影响。
 
-## 五、历史实验结果整理说明
+需要补充的实验：需要重新对DARoDyG在只改变二阶邻居数量与Patch Size，而其他超参数与默认实验参数一致不变的情况下，跑完在Wikipedia、Can. Parl.上的链路预测的3个runs的实验，进行后续分析，同时统计Transductive AP、GPU Memory Usage、Training Time per Epoch三个指标。
 
-目前项目已经开展过部分模型训练和实验，但相关结果仍需依据实际文件进一步核实。
+##画图代码
+论文里用到的雷达图，柱状图，气泡图的画图代码位于figure/目录下，热力图的代码在Latex文档中可以找到。
 
-前期实验曾在不同计算设备和运行环境下进行，部分实验记录、输出文件和统计结果没有完全统一整理。此外，部分实验尚未完成完整测试。
+## 五、训练命令示例
 
-接手后建议首先整理现存实验结果，而不是立即重新运行全部实验。
+## Scripts for Dynamic Link Prediction
 
-### 实验状态分类
+## Model Training
 
-| 状态 | 含义 | 后续工作 |
-|---|---|---|
-| Verified | 结果、配置和计算方式已核验 | 整理为最终统计表 |
-| Pending Aggregation | 各 Seed 结果文件完整，但未汇总 | 计算 Mean ± Std |
-| Pending Verification | 结果文件存在，但对应关系或指标尚未核实 | 核对配置、输出和评估代码 |
-| Needs Rerun | 实验不完整、文件缺失或已知结果有误 | 补跑或重新运行 |
+- Example of training *DyGFormer* on *Wikipedia* dataset:
 
-### 多 Seed 结果整理
+- If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
 
-对于已经完成多个 Seed 的实验：
+```bash
+python train_link_prediction.py --dataset_name uci --model_name DyGFormer --load_best_configs --gpu 0
+```
+## Scripts for Dynamic Node Classification
 
-1. 找到各个 Seed 对应的原始结果文件。
-2. 核对模型、数据集、配置、测试设置和 Seed。
-3. 如果已保存各 Seed 的指标，确认评估方式一致后统一汇总。
-4. 如果只保存 Prediction Scores 和 Labels，需要先使用统一评估脚本重新计算 AP、AUC。
-5. 计算 Mean ± Std，并记录实际参与统计的 Seed 数量及标准差定义。
-6. 对原始记录缺失或者无法确认有效性的实验进行标注，必要时重新运行。
+- Example of training *DyGFormer* on *Wikipedia* dataset:
 
-历史统计结果如果缺少原始文件支持，暂时只作为参考，不直接视为最终论文结果。
-
-
-
-## 六、建议的后续工作顺序
-
-**第一阶段：熟悉代码与现有实验**
-
-了解模块实现、模型入口、训练脚本、数据集和基本运行流程。
-
-**第二阶段：整理已有结果**
-
-汇总不同服务器上的现存结果，识别各实验对应的 Seed、参数配置和评价指标。
-
-**第三阶段：核验并重新统计指标**
-
-统一评估脚本，对可核实的历史结果重新计算各 Seed 指标及 Mean ± Std，优先完成已有结果的整理。
-
-**第四阶段：补充缺失实验**
-
-根据 E1–E8 的实验清单，补充尚未完成或需要重新运行的实验。
-
-**第五阶段：更新论文**
-
-根据经核实的实验结果更新表格、图像和分析结论，保证文本、代码及结果一致。
-
+- If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
+- Backbone & Classifier：联合训练模型骨干网络和分类器。
+```bash
+python train_node_classification.py --dataset_name wikipedia --model_name DyGFormer --node_cls_train_mode random_finetune --load_best_configs --gpu 0
+```
+  
+- Only Classifier：只训练分类器。
+```bash
+python train_node_classification.py --dataset_name wikipedia --model_name DyGFormer --node_cls_train_mode classifier_only --load_best_configs --gpu 0
+```
 ---
 
-**交接说明：**
 
-本次交接主要提供项目已有的模型代码、实验脚本、现存结果文件及已知问题说明。具体实验完成状态仍需根据代码和原始文件确认。后续实验安排、模型优化及论文修改可在此基础上继续开展。
