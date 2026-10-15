@@ -340,28 +340,33 @@ Patch Size：
 
 
 
-## 六、建议的后续工作顺序
+## 六、训练命令示例
 
-**第一阶段：熟悉代码与现有实验**
+## Scripts for Dynamic Link Prediction
 
-了解模块实现、模型入口、训练脚本、数据集和基本运行流程。
+## Model Training
 
-**第二阶段：整理已有结果**
+- Example of training *DyGFormer* on *Wikipedia* dataset:
 
-汇总不同服务器上的现存结果，识别各实验对应的 Seed、参数配置和评价指标。
+- If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
 
-**第三阶段：核验并重新统计指标**
+```bash
+python train_link_prediction.py --dataset_name uci --model_name DyGFormer --load_best_configs --gpu 0
+```
+## Scripts for Dynamic Node Classification
 
-统一评估脚本，对可核实的历史结果重新计算各 Seed 指标及 Mean ± Std，优先完成已有结果的整理。
+- Example of training *DyGFormer* on *Wikipedia* dataset:
 
-**第四阶段：补充缺失实验**
-
-根据 E1–E8 的实验清单，补充尚未完成或需要重新运行的实验。
-
-**第五阶段：更新论文**
-
-根据经核实的实验结果更新表格、图像和分析结论，保证文本、代码及结果一致。
-
+- If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
+- Backbone & Classifier：联合训练模型骨干网络和分类器。
+```bash
+python train_node_classification.py --dataset_name wikipedia --model_name DyGFormer --node_cls_train_mode random_finetune --load_best_configs --gpu 0
+```
+  
+- Only Classifier：只训练分类器。
+```bash
+python train_node_classification.py --dataset_name wikipedia --model_name DyGFormer --node_cls_train_mode classifier_only --load_best_configs --gpu 0
+```
 ---
 
 **交接说明：**
