@@ -125,13 +125,14 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | SDPEDyG | DyGFormerST | MHSA | Shortest Distance PE | 4 |
 | RWPEDyG | DyGFormerD | MHSA | Random Walk PE | 4 |
 | STPEDyG | DyGFormerWSDMP | MHSA | Spatial-Temporal PE | 4 |
+
 | DASTDyG | DyGFormerWSDMPF | Differential Attention | Spatial-Temporal PE | 4 |
 | DARoDyG | DyGFormerFF | Differential Attention | Rotary PE | 4 |
 | CASTDyG | 待搭建 | CARD Attention | Spatial-Temporal PE | 4 |
 | CARoDyG | 待搭建 | CARD Attention | Rotary PE | 4 |
 | NPASDDyG | NPTSTDyG | Non-Parametric Attention | Shortest Distance PE | 4 |
 | NPASTDyG | NPTWSDMP | Non-Parametric Attention | Spatial-Temporal PE | 4 |
-
+（注：组合模型均需重新跑完全部模块级实验之后对比选出Top-2的优势模块进行组合，注意力2*位置编码2，四个组合模型，各自分别在链路预测和节点分类上与十个baseline进行对比）
 
 
 ### 3. 默认超参数
@@ -190,6 +191,7 @@ python preprocess_all_data.py
 目的：分析不同 Attention 机制对于历史交互信息建模的影响，以及在不同数据集上的表现差异。
 
 实验进展：目前已跑完SimpleDyG（DyGFormer）在enron，uci，mooc的链路预测三个runs的实验、DADyG（DyGFormerF）在除了USLegis以外的八个数据集上的三个runs的实验；
+
 需要补充的实验：SimpleDyG、DADyG在各自剩余数据集上的链路预测的三个runs的实验、NPADyG在九个数据集上的链路预测的三个runs的实验、CARDyG需要结合CARD: Channel Aligned Robust Blend Transformer for Time Series
 Forecasting.原始论文，将SimpleDyG里的标准多头注意力替换成原始论文里的CARD注意力作为CARDDyG，搭建好模型后跑完九个数据集上的链路预测的三个runs的实验、 SPSEDyG因为采取了SPSE基于图拓扑结构信息作为注意力分数的偏置，为了提高效率，需要对所有数据集的SPSE特征进行预计算并存储到磁盘里，需要同时考虑正负样本在计算SPSE时计算口径和方式一致，避免训练时出现正负样本SPSE不对称，导致模型分数更容易区分正负样本而拉高指标，再跑完九个数据集上的链路预测的三个runs的实验。目前SimpleDyG、DADyG、NPADyG 和 SPSEDyG模型代码都已搭建好，可直接训练；SPSEDyG需要再完善修改下正负样本的SPSE的预计算、存储方式再进行训练，CARDyG需要在SimpleDyG代码基础上替换成和原始论文一致的CARD注意力，再进行训练。
 
@@ -203,7 +205,8 @@ Forecasting.原始论文，将SimpleDyG里的标准多头注意力替换成原�
 
 目的：研究序列位置编码、图结构编码和时空联合编码的性能差异。
 
-实验进展：目前已跑完RoPEDyG（DyGFormerR）在uci上的一个runs的实验、SDPEDyG（DyGFormerST）在UNvote上的一个runs的实验、
+实验进展：目前已跑完RoPEDyG（DyGFormerR）在uci上的一个runs的实验、SDPEDyG（DyGFormerST）在UNvote上的一个runs的实验、RWPEDyG（DyGFormerD）在wikipedia上预计算rwpe dim=8的三个runs的实验，在mooc上的预计算rwpe dim=24的三个runs的实验。
+
 需要补充的实验：SPEDyG（DyGFormerP）、RoPEDyG（DyGFormerR）、SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD） 和 STPEDyG（DyGFormerWSDMP）在九个数据集上的链路预测的三个runs的实验。SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD）同样因为是基于图拓扑结构的位置编码，可以预先提前对数据集进行预计算，存储来提高训练效率，也需要注意正负样本在计算特征时计算口径和方式一致。五个模型代码都已搭建完成，SDPEDyG（DyGFormerST）、RWPEDyG（DyGFormerD）的预计算代码我已完成好，分别名为precompute_spd_modelfn.py；precompute_rwpe_modelfn.py；因为RWPE里的random walk位置编码的特征维度K，代表它是一个K维的向量，最多包含经过K步游走回到它自身的概率，原始论文里在不同的数据集用了不同的K值，原始论文里是在2,4,8,12,16,20,24,28,32这些2的倍数里选择，我们也需要在这个范围里调一下K值，如果k的选择影响不大，可以不必花费太多时间在挑这个上面，并且运行RWPEDyG（DyGFormerD）的预计算代码时，可以通过更改文件里面预计算时的特征维度值（k）来改变这个预计算和存储的特征维度。
 
 
@@ -221,6 +224,7 @@ Forecasting.原始论文，将SimpleDyG里的标准多头注意力替换成原�
 目的：分析 Patching 对细粒度时序信息与预测性能的影响，并核对不同指标上的实际变化。
 
 实验进展：目前已跑完 SimpleDyG（Without Patching）（DyGFormerC）在mooc上的一个runs的实验；
+
 需要补充的实验：SimpleDyG（Without Patching）（DyGFormerC）在剩余八个数据集上的链路预测的三个runs的实验。
 
 
@@ -257,6 +261,7 @@ RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、EdgeBank、Grap
 目的：验证表现较好的模块组合能否取得有竞争力的结果。
 
 需要补充的实验：需要根据跑完的所有Attention 模块对比实验和Positional Encoding 模块对比实验来挑选各自的Top-2优势模块分别进行组合，得到四个模型与十个baseline在链路预测的九个数据集上进行比较。
+
 已跑完的实验：DASTDyG（DyGFormerWSDMPF）在CanParl, UNtrade, UNvote, USLegis,  uci, wikipedia上的三个runs的实验、在mooc，enron上的两个runs的实验，在reddit上的一个run的实验。
 
 ### E6. 节点分类组合模型与 Baseline 对比
