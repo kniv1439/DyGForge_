@@ -125,13 +125,13 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 | SDPEDyG | DyGFormerST | MHSA | Shortest Distance PE | 4 |
 | RWPEDyG | DyGFormerD | MHSA | Random Walk PE | 4 |
 | STPEDyG | DyGFormerWSDMP | MHSA | Spatial-Temporal PE | 4 |
-
 | DASTDyG | DyGFormerWSDMPF | Differential Attention | Spatial-Temporal PE | 4 |
 | DARoDyG | DyGFormerFF | Differential Attention | Rotary PE | 4 |
 | CASTDyG | 待搭建 | CARD Attention | Spatial-Temporal PE | 4 |
 | CARoDyG | 待搭建 | CARD Attention | Rotary PE | 4 |
 | NPASDDyG | NPTSTDyG | Non-Parametric Attention | Shortest Distance PE | 4 |
 | NPASTDyG | NPTWSDMP | Non-Parametric Attention | Spatial-Temporal PE | 4 |
+
 （注：组合模型均需重新跑完全部模块级实验之后对比选出Top-2的优势模块进行组合，注意力2*位置编码2，四个组合模型，各自分别在链路预测和节点分类上与十个baseline进行对比）
 
 
