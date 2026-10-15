@@ -61,6 +61,17 @@ def get_backbone(model):
             break
     return model
 
+
+def ensure_finite_metrics(metrics: dict, split: str):
+    """Raise instead of silently continuing with unusable (nan/inf) metrics."""
+    bad = [name for name, value in metrics.items() if not np.isfinite(value)]
+    if bad:
+        raise RuntimeError(
+            f'{split} metrics {bad} are not finite. Likely causes: predictions contain nan/inf '
+            f'(training diverged) or the {split} set has only one class.'
+        )
+
+
 # New: submodule getter compatible with both DataParallel and plain models
 def get_submodule(model, idx):
     if isinstance(model, torch.nn.DataParallel):
@@ -767,48 +778,39 @@ if __name__ == "__main__":
                 logger.warning(f"Error computing training metrics: {e}")
                 train_metrics = {'roc_auc': np.nan}
 
-            # Make sure metrics are collected even if validation has problems
-            try:
-                val_total_loss, val_metrics = evaluate_model_node_classification(
-                    model_name=args.model_name,
-                    model=model,
-                    neighbor_sampler=full_neighbor_sampler,
-                    evaluate_idx_data_loader=val_idx_data_loader,
-                    evaluate_data=val_data,
-                    loss_func=loss_func,
-                    num_neighbors=args.num_neighbors,
-                    time_gap=args.time_gap,
-                    edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None
-                )
+            # Validation errors are raised (not swallowed): a failed/nan validation makes model selection meaningless
+            val_total_loss, val_metrics = evaluate_model_node_classification(
+                model_name=args.model_name,
+                model=model,
+                neighbor_sampler=full_neighbor_sampler,
+                evaluate_idx_data_loader=val_idx_data_loader,
+                evaluate_data=val_data,
+                loss_func=loss_func,
+                num_neighbors=args.num_neighbors,
+                time_gap=args.time_gap,
+                edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None
+            )
+            ensure_finite_metrics(val_metrics, 'validation')
 
-                logger.info(f'Epoch: {epoch + 1}, learning rate: {optimizer.param_groups[0]["lr"]}, train loss: {train_total_loss:.4f}')
-                for metric_name in train_metrics.keys():
-                    logger.info(f'train {metric_name}, {train_metrics[metric_name]:.4f}')
-                
-                # Print epoch summary
-                print(f"\n{'='*80}")
-                print(f"Epoch {epoch + 1}/{args.num_epochs} Summary:")
-                print(f"{'='*80}")
-                print(f"Train Loss: {train_total_loss:.4f}")
-                for metric_name in train_metrics.keys():
-                    print(f"Train {metric_name}: {train_metrics[metric_name]:.4f}")
-                
-                logger.info(f'validate loss: {val_total_loss:.4f}')
-                print(f"Validation Loss: {val_total_loss:.4f}")
-                for metric_name in val_metrics.keys():
-                    val_metric_value = val_metrics[metric_name]
-                    # Handle nan values
-                    if np.isnan(val_metric_value):
-                        logger.warning(f'validate {metric_name} is nan (likely because extreme data imbalance makes some batches uncomputable)')
-                        print(f"Validation {metric_name}: nan (data issue, cannot compute)")
-                    else:
-                        logger.info(f'validate {metric_name}, {val_metric_value:.4f}')
-                        print(f"Validation {metric_name}: {val_metric_value:.4f}")
-                print(f"{'='*80}\n")
-            except Exception as e:
-                logger.warning(f"Error during validation: {e}")
-                val_metrics = {"auc": 0.5}  # Default metrics
-                val_total_loss = float('inf')
+            logger.info(f'Epoch: {epoch + 1}, learning rate: {optimizer.param_groups[0]["lr"]}, train loss: {train_total_loss:.4f}')
+            for metric_name in train_metrics.keys():
+                logger.info(f'train {metric_name}, {train_metrics[metric_name]:.4f}')
+
+            # Print epoch summary
+            print(f"\n{'='*80}")
+            print(f"Epoch {epoch + 1}/{args.num_epochs} Summary:")
+            print(f"{'='*80}")
+            print(f"Train Loss: {train_total_loss:.4f}")
+            for metric_name in train_metrics.keys():
+                print(f"Train {metric_name}: {train_metrics[metric_name]:.4f}")
+
+            logger.info(f'validate loss: {val_total_loss:.4f}')
+            print(f"Validation Loss: {val_total_loss:.4f}")
+            for metric_name in val_metrics.keys():
+                val_metric_value = val_metrics[metric_name]
+                logger.info(f'validate {metric_name}, {val_metric_value:.4f}')
+                print(f"Validation {metric_name}: {val_metric_value:.4f}")
+            print(f"{'='*80}\n")
 
             # perform testing once after test_interval_epochs
             if (epoch + 1) % args.test_interval_epochs == 0:
@@ -816,24 +818,20 @@ if __name__ == "__main__":
                     # backup memory bank after validating so it can be used for testing nodes (since test edges are strictly later in time than validation edges)
                     val_backup_memory_bank = get_submodule(model, 0).memory_bank.backup_memory_bank()
 
-                try:
-                    test_total_loss, test_metrics = evaluate_model_node_classification(model_name=args.model_name,
-                                                                                    model=model,
-                                                                                    neighbor_sampler=full_neighbor_sampler,
-                                                                                    evaluate_idx_data_loader=test_idx_data_loader,
-                                                                                    evaluate_data=test_data,
-                                                                                    loss_func=loss_func,
-                                                                                    num_neighbors=args.num_neighbors,
-                                                                                    time_gap=args.time_gap,
-                                                                                    edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None)
+                # monitoring only (not used for model selection); errors are raised, not swallowed
+                test_total_loss, test_metrics = evaluate_model_node_classification(model_name=args.model_name,
+                                                                                model=model,
+                                                                                neighbor_sampler=full_neighbor_sampler,
+                                                                                evaluate_idx_data_loader=test_idx_data_loader,
+                                                                                evaluate_data=test_data,
+                                                                                loss_func=loss_func,
+                                                                                num_neighbors=args.num_neighbors,
+                                                                                time_gap=args.time_gap,
+                                                                                edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None)
 
-                    logger.info(f'test loss: {test_total_loss:.4f}')
-                    for metric_name in test_metrics.keys():
-                        logger.info(f'test {metric_name}, {test_metrics[metric_name]:.4f}')
-                except Exception as e:
-                    logger.info(f"Error during testing, skipping this test")
-                    test_metrics = {"auc": 0.5}  # Default metrics
-                    test_total_loss = float('inf')
+                logger.info(f'test loss: {test_total_loss:.4f}')
+                for metric_name in test_metrics.keys():
+                    logger.info(f'test {metric_name}, {test_metrics[metric_name]:.4f}')
 
                 if args.model_name in ['JODIE', 'DyRep', 'TGN']:
                     # reload validation memory bank for saving models
@@ -841,14 +839,8 @@ if __name__ == "__main__":
                     get_submodule(model, 0).memory_bank.reload_memory_bank(val_backup_memory_bank)
 
             # select the best model based on all the validate metrics
-            val_metric_indicator = []
-            for metric_name in val_metrics.keys():
-                metric_value = val_metrics[metric_name]
-                # If the metric is nan, use 0.0 as the default (this won't break early stopping, but a warning is logged)
-                if np.isnan(metric_value):
-                    logger.warning(f"Validation metric {metric_name} is nan, using 0.0 for early stopping (may affect model selection)")
-                    metric_value = 0.0
-                val_metric_indicator.append((metric_name, metric_value, True))
+            # (validation metrics are guaranteed finite here, see ensure_finite_metrics above)
+            val_metric_indicator = [(metric_name, metric_value, True) for metric_name, metric_value in val_metrics.items()]
             early_stop = early_stopping.step(val_metric_indicator, model)
 
             # Persist newly computed (node,t) RWPE from misses
@@ -906,50 +898,44 @@ if __name__ == "__main__":
 
         # Validation evaluation
         if args.model_name not in ['JODIE', 'DyRep', 'TGN']:
-            try:
-                val_total_loss, val_metrics = evaluate_model_node_classification(
-                    model_name=args.model_name,
-                    model=model,
-                    neighbor_sampler=full_neighbor_sampler,
-                    evaluate_idx_data_loader=val_idx_data_loader,
-                    evaluate_data=val_data,
-                    loss_func=loss_func,
-                    num_neighbors=args.num_neighbors,
-                    time_gap=args.time_gap,
-                    edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None
-                )
-                logger.info(f'Validation metrics: loss={val_total_loss:.4f}')
-                val_metric_dict = {}
-                for metric_name in val_metrics.keys():
-                    val_metric = val_metrics[metric_name]
-                    logger.info(f'Validation {metric_name}={val_metric:.4f}')
-                    val_metric_dict[metric_name] = val_metric
-            except Exception as e:
-                logger.info(f"Final validation evaluation failed")
-                val_metric_dict = {"auc": 0.5}  # Default metrics
-
-        # Test evaluation
-        try:
-            test_total_loss, test_metrics = evaluate_model_node_classification(
+            val_total_loss, val_metrics = evaluate_model_node_classification(
                 model_name=args.model_name,
                 model=model,
                 neighbor_sampler=full_neighbor_sampler,
-                evaluate_idx_data_loader=test_idx_data_loader,
-                evaluate_data=test_data,
+                evaluate_idx_data_loader=val_idx_data_loader,
+                evaluate_data=val_data,
                 loss_func=loss_func,
                 num_neighbors=args.num_neighbors,
                 time_gap=args.time_gap,
                 edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None
             )
-            logger.info(f'Test metrics: loss={test_total_loss:.4f}')
-            test_metric_dict = {}
-            for metric_name in test_metrics.keys():
-                test_metric = test_metrics[metric_name]
-                logger.info(f'Test {metric_name}={test_metric:.4f}')
-                test_metric_dict[metric_name] = test_metric
-        except Exception as e:
-            logger.info(f"Final test evaluation failed")
-            test_metric_dict = {"auc": 0.5}  # Default metrics
+            ensure_finite_metrics(val_metrics, 'validation')
+            logger.info(f'Validation metrics: loss={val_total_loss:.4f}')
+            val_metric_dict = {}
+            for metric_name in val_metrics.keys():
+                val_metric = val_metrics[metric_name]
+                logger.info(f'Validation {metric_name}={val_metric:.4f}')
+                val_metric_dict[metric_name] = val_metric
+
+        # Test evaluation
+        test_total_loss, test_metrics = evaluate_model_node_classification(
+            model_name=args.model_name,
+            model=model,
+            neighbor_sampler=full_neighbor_sampler,
+            evaluate_idx_data_loader=test_idx_data_loader,
+            evaluate_data=test_data,
+            loss_func=loss_func,
+            num_neighbors=args.num_neighbors,
+            time_gap=args.time_gap,
+            edge_neighbor_sampler=full_edge_neighbor_sampler if args.model_name == 'RepeatMixer' else None
+        )
+        ensure_finite_metrics(test_metrics, 'test')
+        logger.info(f'Test metrics: loss={test_total_loss:.4f}')
+        test_metric_dict = {}
+        for metric_name in test_metrics.keys():
+            test_metric = test_metrics[metric_name]
+            logger.info(f'Test {metric_name}={test_metric:.4f}')
+            test_metric_dict[metric_name] = test_metric
 
         # Collect performance metrics
         single_run_time = time.time() - run_start_time
