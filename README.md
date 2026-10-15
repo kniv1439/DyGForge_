@@ -158,6 +158,8 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 ## 四、需要完成或核验的实验
 
+##已经跑完的实验结果放在saved_results目录下。
+
 ## 数据集下载及预处理
 Nine datasets are used in DyGForge, including Wikipedia, Reddit, MOOC, Enron, UCI, Can. Parl., US Legis., UN Trade, UN Vote.
 
