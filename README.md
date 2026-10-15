@@ -157,6 +157,25 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 ## 四、需要完成或核验的实验
 
+## 数据集下载及预处理
+Most of the used original dynamic graph datasets come from Towards Better Evaluation for Dynamic Link Prediction, which can be downloaded here https://github.com/erfanloghmani/myket-android-application-market-dataset. Please download them and put them in DG_data folder. 
+
+
+We can run `preprocess_data/preprocess_data.py` for pre-processing the datasets. For example, to preprocess the *Wikipedia* dataset, we can run the following commands:
+
+```bash
+cd preprocess_data/
+python preprocess_data.py --dataset_name wikipedia
+```
+
+We can also run the following commands to preprocess all the original datasets at once:
+
+```bash
+cd preprocess_data/
+python preprocess_all_data.py
+```
+
+
 
 ### E1. Attention 模块对比实验
 
