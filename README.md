@@ -158,7 +158,9 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 ## 四、需要完成或核验的实验
 
 ## 数据集下载及预处理
-Most of the used original dynamic graph datasets come from Towards Better Evaluation for Dynamic Link Prediction, which can be downloaded [here [https://github.com/erfanloghmani/myket-android-application-market-dataset](https://zenodo.org/records/7213796#.Y1cO6y8r30o). Please download them and put them in DG_data folder. 
+Nine datasets are used in DyGForge, including Wikipedia, Reddit, MOOC, Enron, UCI, Can. Parl., US Legis., UN Trade, UN Vote.
+
+All of the used original dynamic graph datasets come from Towards Better Evaluation for Dynamic Link Prediction, which can be downloaded [here [https://github.com/erfanloghmani/myket-android-application-market-dataset](https://zenodo.org/records/7213796#.Y1cO6y8r30o). Please download them and put them in DG_data folder. 
 
 
 We can run `preprocess_data/preprocess_data.py` for pre-processing the datasets. For example, to preprocess the *Wikipedia* dataset, we can run the following commands:
