@@ -342,8 +342,13 @@ Patch Size：
 ## Scripts for Dynamic Link Prediction
 
 ## Model Training
-
+  
 - Example of training *DyGFormer* on *Wikipedia* dataset:
+
+  ```bash
+  python train_link_prediction.py --dataset_name uci --model_name DyGFormer --num_layers 2 --num_heads 4 --dropout 0.2 --max_input_sequence_length 512 --channel_embedding_dim 32 --patch_size 4 --learning_rate 0.0001 --weight_decay 0.0001 --batch_size 200 --num_epochs 100 --patience 20 --gpu 0
+  ```
+
 
 - If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
 
