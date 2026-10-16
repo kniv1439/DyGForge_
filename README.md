@@ -158,6 +158,80 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 
 ## 四、需要完成或核验的实验
 
+实验进度总览（Experiment Progress Overview）
+
+实验编号
+
+实验内容
+
+当前实验进度
+
+后续主要工作
+
+E1
+
+Attention 模块对比
+
+SimpleDyG 已完成 Enron、UCI、MOOC 各 3 Runs；DADyG 已完成除 US Legis. 外的 8 个数据集各 3 Runs；NPADyG、SPSEDyG 已有模型代码；CARDyG 尚未搭建
+
+补充 SimpleDyG、DADyG 的剩余实验；完成 NPADyG 的 9 个数据集实验；搭建 CARDyG；完善 SPSE 预计算及正负样本处理；各模型完成 3 Runs
+
+E2
+
+Positional Encoding 模块对比
+
+RoPEDyG 在 UCI 完成 1 Run；SDPEDyG 在 UN Vote 完成 1 Run；RWPEDyG 在 Wikipedia（K=8）、MOOC（K=24）各完成 3 Runs；5 个模型代码均已搭建
+
+补充 SPEDyG、RoPEDyG、SDPEDyG、RWPEDyG、STPEDyG 在 9 个数据集上的 3 Runs；核对已有结果；根据需要调整 RWPE 的 K 值
+
+E3
+
+Patching 消融实验
+
+SimpleDyG (w/o Patch) 在 MOOC 完成 1 Run；SimpleDyG 默认 Patching 已有部分实验结果
+
+补充 MOOC 剩余 2 Runs，以及其他 8 个数据集各 3 Runs；比较有无 Patching 的 AP、AUC-ROC
+
+E4
+
+动态节点分类模块对比
+
+README 尚未列出已完成的系统性节点分类实验
+
+在 Wikipedia、Reddit 上完成 11 个模型的 Backbone & Classifier、Only Classifier 两种训练设置，各 3 Runs，并统计 AUC-ROC
+
+E5
+
+链路预测组合模型与 SOTA 对比
+
+DASTDyG 在 Can. Parl.、UN Trade、UN Vote、US Legis.、UCI、Wikipedia 各完成 3 Runs；MOOC、Enron 各完成 2 Runs；Reddit 完成 1 Run
+
+补齐 DASTDyG 剩余 Runs；根据 E1、E2 结果选取优势模块，完成 4 个组合模型与 10 个 Baseline 在 9 个数据集上的对比
+
+E6
+
+节点分类组合模型与 Baseline 对比
+
+待根据 E4 的模块级实验结果确定最终组合模型
+
+选择 Top-2 Attention 与 Top-2 PE，构建 4 个组合模型；在 Wikipedia、Reddit 上完成两种训练设置的实验，并与适用的 Baseline 对比
+
+E7
+
+计算效率实验
+
+待系统统计
+
+在链路预测 Wikipedia、Reddit、MOOC、Can. Parl. 及节点分类 Wikipedia、Reddit 上统计 GPU Memory Usage、Parameter Size、Training Time of the First Step
+
+E8
+
+Patching × 二阶邻居数量实验
+
+待完成系统性实验
+
+使用 DARoDyG，在 Wikipedia、Can. Parl. 上测试 5 种二阶邻居数量 × 5 种 Patch Size，共 25 种配置，每种配置 3 Runs；统计 AP、GPU Memory 和 Training Time per Epoch
+
 ##已经跑完的实验结果放在saved_results目录下。
 
 ## 数据集下载及预处理
