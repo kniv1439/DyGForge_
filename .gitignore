@@ -226,7 +226,7 @@ cat >> .gitignore <<'EOF'
 /DG_data/
 logs/
 saved_models/
-saved_results/
+
 *.pth
 *.pt
 *.ckpt
