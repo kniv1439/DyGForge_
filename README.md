@@ -163,7 +163,8 @@ Wikipedia、Reddit、MOOC、Enron、UCI、Can. Parl.、US Legis.、UN Trade、UN
 ## 数据集下载及预处理
 Nine datasets are used in DyGForge, including Wikipedia, Reddit, MOOC, Enron, UCI, Can. Parl., US Legis., UN Trade, UN Vote.
 
-All of the used original dynamic graph datasets come from Towards Better Evaluation for Dynamic Link Prediction, which can be downloaded [here [https://github.com/erfanloghmani/myket-android-application-market-dataset](https://zenodo.org/records/7213796#.Y1cO6y8r30o). Please download them and put them in DG_data folder. 
+The datasets can be downloaded from
+[Zenodo](https://zenodo.org/records/7213796). Please download them and put them in DG_data folder. 
 
 
 We can run `preprocess_data/preprocess_data.py` for pre-processing the datasets. For example, to preprocess the *Wikipedia* dataset, we can run the following commands:
@@ -280,7 +281,7 @@ RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、EdgeBank、Grap
 
 目的：检验不同 Attention 与 PE 的组合是否能够进一步提高节点分类性能。
 
-需要补充的实验：需要重新在E4. 动态节点分类模块挑选出Top-2的优势模块进行组合，与RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、EdgeBank、GraphMixer、TCL十个baseline模型均重新对比跑完在wikipedia和reddit数据集上的Backbone & Classifier 和 Only Classifier 两种训练设置的3个runs的综合结果，均值±标准差。
+需要补充的实验：需要重新在E4. 动态节点分类模块挑选出Top-2的优势模块进行组合，与RepeatMixer、TIDFormer、DyGFormer、CNEN、TGAT、TGN、CAWN、GraphMixer、TCL九个baseline模型均重新对比跑完在wikipedia和reddit数据集上的Backbone & Classifier 和 Only Classifier 两种训练设置的3个runs的综合结果，均值±标准差（注：Edgebank不适用于节点分类任务）。
 
 ### E7. 计算效率实验
 
@@ -343,14 +344,14 @@ Patch Size：
 
 ## Model Training
   
-- Example of training *DyGFormer* on *Wikipedia* dataset:
+- Example of training *DyGFormer* on *UCI* dataset:
 
 ```bash
   python train_link_prediction.py --dataset_name uci --model_name DyGFormer --num_layers 2 --num_heads 4 --dropout 0.2 --max_input_sequence_length 512 --channel_embedding_dim 32 --patch_size 4 --learning_rate 0.0001 --weight_decay 0.0001 --batch_size 200 --num_epochs 100 --patience 20 --gpu 0
   ```
 
 
-- If you want to use the best model configurations to train *DyGFormer* on *Wikipedia* dataset, run
+- If you want to use the best model configurations to train *DyGFormer* on *UCI* dataset, run
 
 ```bash
 python train_link_prediction.py --dataset_name uci --model_name DyGFormer --load_best_configs --gpu 0
